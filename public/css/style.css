@@ -1,0 +1,12 @@
+.float-right{
+    float:right;
+}
+.title {
+    font-weight:bold;
+    font-size:16px;
+    font-family:Verdana;
+}
+
+.activeLink {
+    font-weight:bold;
+}
