@@ -3,18 +3,18 @@
 namespace App\Http\Controllers;
 use Auth;
 
-use App\Tasks;
+use Input;
+use App\Cat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class TasksController extends Controller
+class CatController extends Controller
 {
 
     public function __construct() {
         $this->middleware('auth');
-
-
     }
+
     /**
      * Display a listing of the resource.
      *
@@ -28,23 +28,23 @@ class TasksController extends Controller
         ]);
         $search = $request->search;
         $sort = $request->sort;
-        $tasks = new Tasks();
+        $cat = new Cat();
         if ($sort == 'old') {
-            $tasks = $tasks->orderBy('created_at', 'asc');
+            $cat = $cat->orderBy('created_at', 'asc');
         } elseif ($sort == 'asc') {
-            $tasks = $tasks->orderBy('title', 'asc');
+            $cat = $cat->orderBy('title', 'asc');
         } elseif ($sort == 'desc') {
-            $tasks = $tasks->orderBy('title', 'desc');
+            $cat = $cat->orderBy('title', 'desc');
         } else {
-            $tasks = $tasks->orderBy('created_at', 'desc');
+            $cat = $cat->orderBy('created_at', 'desc');
         }
         if (!empty($search)) {
-            $tasks = $tasks->where("title", "like", "%" . $search . "%");
+            $cat = $cat->where("title", "like", "%" . $search . "%");
         }
 
-        $tasks = $tasks->paginate(3);
+        $cats = $cat->paginate(3);
 
-        return view('tasks.index', compact('tasks', 'sort', 'search'));
+        return view('cat.index', compact('cats', 'sort', 'search'));
     }
 
     /**
@@ -54,7 +54,7 @@ class TasksController extends Controller
      */
     public function create()
     {
-        return view('tasks.create');
+        return view('cat.create');
     }
 
     /**
@@ -66,20 +66,20 @@ class TasksController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|min:3|unique:tasks|max:30|regex:/^[a-zA-Z0-9_ -]+$/',
+            'title' => 'required|min:3|unique:cat|max:30|regex:/^[a-zA-Z0-9_ -]+$/',
             'description' => 'nullable|regex:/^[a-zA-Z0-9_ -]+$/'
         ]);
-        Tasks::create(['title' => $request->title,'description' => $request->description]);
-        return redirect(route('tasks.index'));
+        Cat::create(['title' => $request->title,'description' => $request->description]);
+        return redirect(route('cat.index'));
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Tasks  $tasks
+     * @param  \App\Cat  $cat
      * @return \Illuminate\Http\Response
      */
-    public function show(Tasks $tasks)
+    public function show(Cat $cat)
     {
         //
     }
@@ -87,28 +87,30 @@ class TasksController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Tasks  $tasks
+     * @param  \App\Cat  $cat
      * @return \Illuminate\Http\Response
      */
-    public function edit(Tasks $task)
+    public function edit(Cat $cat)
     {
-        return view('tasks.edit', compact('task'));
+        return view('cat.edit', compact('cat'));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Tasks  $tasks
+     * @param  \App\Cat  $cat
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Tasks $task)
+    public function update(Request $request, Cat $cat)
     {
         $request->validate([
-            'title' => 'required|min:3|unique:tasks|max:30|regex:/^[a-zA-Z0-9_ -]+$/',
-            'desc' => 'nullable|regex:/^[a-zA-Z0-9_ -]+$/'
+            'title' => 'required|min:3|unique:cat|max:30|regex:/^[a-zA-Z0-9_ -]+$/',
+            'description' => 'nullable|regex:/^[a-zA-Z0-9_ -]+$/'
         ]);
-        $task->update($request->only('title'));
+        $cat->title = $request->title;
+        $cat->description = $request->description;
+        $cat->update();
         $page = $request->input('on_page');
         if (empty($page)) {
             $arr = array();
@@ -116,18 +118,18 @@ class TasksController extends Controller
             $arr = ['page' => $page];
         }
 
-        return redirect()->route('tasks.index', $arr);
+        return redirect()->route('cat.index', $arr);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Tasks  $tasks
+     * @param  \App\Cat  $cat
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Tasks $task)
+    public function destroy(Cat $cat)
     {
-        $task->delete();
-        return redirect(route('tasks.index'));
+        $cat->delete();
+        return redirect(route('cat.index'));
     }
 }

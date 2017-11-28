@@ -31,3 +31,11 @@ Route::post('/tasks', 'TasksController@store')->name('tasks.store');
 Route::get('/tasks/{task}/edit', 'TasksController@edit')->name('tasks.edit');
 Route::post('/tasks/{task}/update', 'TasksController@update')->name('tasks.update');
 Route::get('/tasks/{task}', 'TasksController@destroy')->name('tasks.delete');
+
+// Cat category editor
+Route::get('/cat','CatController@index')->name('cat.index');
+Route::get('/cat/create', 'CatController@create')->name('cat.create');
+Route::post('/cat', 'CatController@store')->name('cat.store');
+Route::get('/cat/{cat}/edit', 'CatController@edit')->name('cat.edit');
+Route::post('/cat/{cat}/update', 'CatController@update')->name('cat.update');
+Route::get('/cat/{cat}', 'CatController@destroy')->name('cat.delete');

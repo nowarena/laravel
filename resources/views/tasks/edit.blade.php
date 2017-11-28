@@ -3,7 +3,7 @@
 @section('content')
     <div class="container">
 
-        @include('layouts.partials.tasksnav')
+        @include('layouts.partials.adminnav')
 
         <form action="{{ route('tasks.update', $task) }}" method="post">
 
