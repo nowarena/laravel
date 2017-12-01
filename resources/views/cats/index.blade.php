@@ -1,4 +1,4 @@
-@extends('views.layouts.adminlayout')
+@extends('layouts.adminlayout')
 
 @section('content')
 
@@ -16,7 +16,7 @@
         <div class="sectionForm">
         <input type="text" size="30" name="title" placeholder="Title">
         <input type="text" size="60" name="description" placeholder="Description">
-        <input class="btn btn-primary" type="submit" value="Add Task">
+        <input class="btn btn-primary" type="submit" value="Add Category">
         </div>
 
     </form>
