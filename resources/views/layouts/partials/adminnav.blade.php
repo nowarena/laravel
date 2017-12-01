@@ -1,6 +1,6 @@
 <ul class="nav nav-pills">
     <li class="nav-item">
-        <a class="nav-link" href="/cat">Mng Categories</a>
+        <a class="nav-link" href="/cats">Mng Categories</a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="#">Link</a>

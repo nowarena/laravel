@@ -8,7 +8,7 @@ use App\Cat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class CatController extends Controller
+class CatsController extends Controller
 {
 
     public function __construct() {
@@ -28,23 +28,23 @@ class CatController extends Controller
         ]);
         $search = $request->search;
         $sort = $request->sort;
-        $cat = new Cat();
+        $cats = new Cats();
         if ($sort == 'old') {
-            $cat = $cat->orderBy('created_at', 'asc');
+            $cats = $cats->orderBy('created_at', 'asc');
         } elseif ($sort == 'asc') {
-            $cat = $cat->orderBy('title', 'asc');
+            $cats = $cats->orderBy('title', 'asc');
         } elseif ($sort == 'desc') {
-            $cat = $cat->orderBy('title', 'desc');
+            $cats = $cats->orderBy('title', 'desc');
         } else {
-            $cat = $cat->orderBy('created_at', 'desc');
+            $cats = $cats->orderBy('created_at', 'desc');
         }
         if (!empty($search)) {
-            $cat = $cat->where("title", "like", "%" . $search . "%");
+            $cats = $cats->where("title", "like", "%" . $search . "%");
         }
 
-        $cats = $cat->paginate(3);
+        $cats = $cats->paginate(3);
 
-        return view('cat.index', compact('cats', 'sort', 'search'));
+        return view('cats.index', compact('cats', 'sort', 'search'));
     }
 
     /**
@@ -54,7 +54,7 @@ class CatController extends Controller
      */
     public function create()
     {
-        return view('cat.create');
+        return view('cats.create');
     }
 
     /**
@@ -66,20 +66,20 @@ class CatController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|min:3|unique:cat|max:30|regex:/^[a-zA-Z0-9_ -]+$/',
+            'title' => 'required|min:3|unique:cats|max:30|regex:/^[a-zA-Z0-9_ -]+$/',
             'description' => 'nullable|regex:/^[a-zA-Z0-9_ -]+$/'
         ]);
-        Cat::create(['title' => $request->title,'description' => $request->description]);
-        return redirect(route('cat.index'));
+        Cats::create(['title' => $request->title,'description' => $request->description]);
+        return redirect(route('cats.index'));
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Cat  $cat
+     * @param  \App\Cats  $cats
      * @return \Illuminate\Http\Response
      */
-    public function show(Cat $cat)
+    public function show(Cats $cats)
     {
         //
     }
@@ -87,30 +87,30 @@ class CatController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Cat  $cat
+     * @param  \App\Cats  $cats
      * @return \Illuminate\Http\Response
      */
-    public function edit(Cat $cat)
+    public function edit(Cats $cats)
     {
-        return view('cat.edit', compact('cat'));
+        return view('cats.edit', compact('cats'));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Cat  $cat
+     * @param  \App\Cats  $cats
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Cat $cat)
+    public function update(Request $request, Cats $cats)
     {
         $request->validate([
-            'title' => 'required|min:3|unique:cat|max:30|regex:/^[a-zA-Z0-9_ -]+$/',
+            'title' => 'required|min:3|unique:cats|max:30|regex:/^[a-zA-Z0-9_ -]+$/',
             'description' => 'nullable|regex:/^[a-zA-Z0-9_ -]+$/'
         ]);
-        $cat->title = $request->title;
-        $cat->description = $request->description;
-        $cat->update();
+        $cats->title = $request->title;
+        $cats->description = $request->description;
+        $cats->update();
         $page = $request->input('on_page');
         if (empty($page)) {
             $arr = array();
@@ -118,18 +118,18 @@ class CatController extends Controller
             $arr = ['page' => $page];
         }
 
-        return redirect()->route('cat.index', $arr);
+        return redirect()->route('cats.index', $arr);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Cat  $cat
+     * @param  \App\Cats  $cats
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Cat $cat)
+    public function destroy(Cats $cats)
     {
-        $cat->delete();
-        return redirect(route('cat.index'));
+        $cats->delete();
+        return redirect(route('cats.index'));
     }
 }

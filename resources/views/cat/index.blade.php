@@ -8,7 +8,7 @@
 
     @include('layouts.partials.errors')
 
-    <form action="{{ route('cat.store') }}" method="post">
+    <form action="{{ route('cats.store') }}" method="post">
 
         {{ csrf_field() }}
 
@@ -23,7 +23,7 @@
 
     <div style="clear:both;"> </div>
 
-    <form action="{{ route('cat.index') }}" method="get">
+    <form action="{{ route('cats.index') }}" method="get">
         <h2 class="sectionTitle">Edit</h2>
         <div class="sectionForm">
             <input type='text' name='search' size='20' placeholder='Search' value="{{ $search }}">
@@ -56,19 +56,19 @@
     echo '<li class="nav-item" style="margin-top:10px;font-weight:bold;">Sort:</li>';
 
     echo '<li class="nav-item">';
-    echo '<a class="nav-link ' . $descActive . '" href="/cat?sort=desc' . $searchQStr . '">Alpha Desc</a>';
+    echo '<a class="nav-link ' . $descActive . '" href="/cats?sort=desc' . $searchQStr . '">Alpha Desc</a>';
     echo '</li>';
 
     echo '<li class="nav-item">';
-    echo '<a class="nav-link ' . $ascActive . '" href="/cat?sort=asc' . $searchQStr . '">Alpha Asc</a>';
+    echo '<a class="nav-link ' . $ascActive . '" href="/cats?sort=asc' . $searchQStr . '">Alpha Asc</a>';
     echo '</li>';
 
     echo '<li class="nav-item">';
-    echo '<a class="nav-link ' . $newActive . '" href="/cat?sort=new' . $searchQStr . '">Newest First</a>';
+    echo '<a class="nav-link ' . $newActive . '" href="/cats?sort=new' . $searchQStr . '">Newest First</a>';
     echo '</li>';
 
     echo '<li class="nav-item">';
-    echo '<a class="nav-link ' . $oldActive . '" href="/cat?sort=old' . $searchQStr . '">Oldest First</a>';
+    echo '<a class="nav-link ' . $oldActive . '" href="/cats?sort=old' . $searchQStr . '">Oldest First</a>';
     echo '</li>';
 
     echo '</ul>';
@@ -78,7 +78,7 @@
     <div style="clear:both;"></div>
     <table border="0" cellpadding="4" cellspacing="4">
         @foreach( $cats as $task )
-            <form action="{{ route('cat.update', $task) }}" method="post">
+            <form action="{{ route('cats.update', $task) }}" method="post">
             <input type="hidden" name="on_page" value="{{$cats->currentPage()}}">
             {{ csrf_field() }}
             <tr>
@@ -92,7 +92,7 @@
                     <button class="btn btn-primary" name="edit">Submit Edit</button>
                 </td>
                 <td>
-                    <a class="btn btn-danger" href="{{ route('cat.delete', $task )}}" onclick="return confirm('Really delete?');">Delete</a>
+                    <a class="btn btn-danger" href="{{ route('cats.delete', $task )}}" onclick="return confirm('Really delete?');">Delete</a>
 
                 </td>
             </tr>
