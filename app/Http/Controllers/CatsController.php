@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 use Auth;
 
 use Input;
-use App\Cat;
+use App\Cats;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
