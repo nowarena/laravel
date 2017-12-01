@@ -32,10 +32,18 @@ Route::get('/tasks/{task}/edit', 'TasksController@edit')->name('tasks.edit');
 Route::post('/tasks/{task}/update', 'TasksController@update')->name('tasks.update');
 Route::get('/tasks/{task}', 'TasksController@destroy')->name('tasks.delete');
 
-// Cats category editor
+// category editor
 Route::get('/cats','CatsController@index')->name('cats.index');
 Route::get('/cats/create', 'CatsController@create')->name('cats.create');
 Route::post('/cats', 'CatsController@store')->name('cats.store');
 Route::get('/cats/{cats}/edit', 'CatsController@edit')->name('cats.edit');
 Route::post('/cats/{cats}/update', 'CatsController@update')->name('cats.update');
 Route::get('/cats/{cats}', 'CatsController@destroy')->name('cats.delete');
+
+// items editor
+Route::get('/items','ItemsController@index')->name('items.index');
+Route::get('/items/create', 'ItemsController@create')->name('items.create');
+Route::post('/items', 'ItemsController@store')->name('items.store');
+Route::get('/items/{items}/edit', 'ItemsController@edit')->name('items.edit');
+Route::post('/items/{items}/update', 'ItemsController@update')->name('items.update');
+Route::get('/items/{items}', 'ItemsController@destroy')->name('items.delete');
