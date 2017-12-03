@@ -8,6 +8,7 @@
 
     @include('layouts.partials.errors')
 
+    <!-- ADD CAT FORM-->
     <form action="{{ route('cats.store') }}" method="post">
 
         {{ csrf_field() }}
@@ -23,6 +24,8 @@
 
     <div style="clear:both;"> </div>
 
+
+    <!-- EDIT CAT SECTION-->
     <form action="{{ route('cats.index') }}" method="get">
         <h2 class="sectionTitle">Edit</h2>
         <div class="sectionForm">
@@ -33,6 +36,7 @@
 
     @php
 
+    // SORT EDIT CATS LINKS
     $searchQStr = '';
     if (!empty($search)) {
         $searchQStr = "&search=" . urlencode($search);
@@ -76,6 +80,8 @@
     @endphp
 
     <div style="clear:both;"></div>
+
+    <!-- EDIT CATS FORM LIST-->
     <table border="0" cellpadding="4" cellspacing="4">
         @foreach( $cats as $task )
             <form action="{{ route('cats.update', $task) }}" method="post">
@@ -84,6 +90,7 @@
             <tr>
                 <td>
                     <input type="text" size="30" name="title" value="{{ $task->title }}">
+                    <input type="hidden" size="30" name="title_old" value="{{ $task->title }}">
                 </td>
                 <td>
                     <input type="text" size="60" name="description" value="{{ $task->description }}">
@@ -100,6 +107,7 @@
         @endforeach
     </table>
 
+    <!-- PAGINATION-->
     {!! $cats->appends(['sort' => $sort, 'search' => $search])->render() !!}
 
 @php

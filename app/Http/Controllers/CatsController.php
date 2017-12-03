@@ -104,8 +104,13 @@ class CatsController extends Controller
      */
     public function update(Request $request, Cats $cats)
     {
+
+        $uniqueTitleValidation = '';
+        if (trim(strtolower($request->title_old)) != trim(strtolower($request->title))) {
+            $uniqueTitleValidation = '|unique:cats';
+        }
         $request->validate([
-            'title' => 'required|min:3|unique:cats|max:30|regex:/^[a-zA-Z0-9_ -]+$/',
+            'title' => 'required|min:3|max:30|regex:/^[a-zA-Z0-9_ -]+$/' . $uniqueTitleValidation,
             'description' => 'nullable|regex:/^[a-zA-Z0-9_ -]+$/'
         ]);
         $cats->title = $request->title;

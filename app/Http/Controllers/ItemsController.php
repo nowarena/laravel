@@ -5,6 +5,8 @@ use Auth;
 
 use Input;
 use App\Items;
+use App\ItemsCats;
+use App\Cats;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -15,6 +17,30 @@ class ItemsController extends Controller
         $this->middleware('auth');
     }
 
+    /*
+     * Associate an items_id with a cats_id in the items_cats join table
+     */
+    public function updateItemCat(Request $request)
+    {
+        $request->validate([
+            'cats_id' => 'integer',
+            'items_id' => 'integer',
+            'items_cats_id' => 'integer'
+        ]);
+        $catsId = $request->cats_id;
+        $itemsId = $request->items_id;
+        $itemsCatsId = $request->items_cats_id;
+        $itemsCats = new ItemsCats();
+        if ($itemsCatsId == 0) {
+            ItemsCats::create(['cats_id' => $catsId, 'items_id' => $request->items_id]);
+        } else {
+            $itemsCats->where('id', $itemsCatsId)->update(['items_id' => $itemsId, 'cats_id' => $catsId]);
+        }
+
+        return response()->json(array($catsId,$itemsId));
+
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -22,6 +48,7 @@ class ItemsController extends Controller
      */
     public function index(Request $request)
     {
+
         DB::enableQueryLog();
         $request->validate([
             'search' => 'nullable|min:3|max:255|regex:/^[a-zA-Z0-9_ -]+$/'
@@ -44,7 +71,23 @@ class ItemsController extends Controller
 
         $items = $items->paginate(3);
 
-        return view('items.index', compact('items', 'sort', 'search'));
+        $cats = new Cats();
+        $catsArr = $cats->get();
+
+        $itemsIdArr = array();
+        foreach ($items as $item) {
+            $itemsIdArr[] = $item->id;
+        }
+//        $itemsCats = new ItemsCats();
+        $selectedCatsArr = array();
+        if (count($itemsIdArr)) {
+            $selectedCatsArr = DB::table('items_cats')->whereIn('items_id', $itemsIdArr)->get();
+        }
+
+        return view(
+            'items.index',
+            compact('items', 'sort', 'search', 'catsArr', 'selectedCatsArr')
+        );
     }
 
     /**
@@ -104,8 +147,12 @@ class ItemsController extends Controller
      */
     public function update(Request $request, Items $items)
     {
+        $uniqueTitleValidation = '';
+        if (trim(strtolower($request->title_old)) != trim(strtolower($request->title))) {
+            $uniqueTitleValidation = '|unique:items';
+        }
         $request->validate([
-            'title' => 'required|min:3|unique:items|max:30|regex:/^[a-zA-Z0-9_ -]+$/',
+            'title' => 'required|min:3|max:30|regex:/^[a-zA-Z0-9_ -]+$/' . $uniqueTitleValidation,
             'description' => 'nullable|regex:/^[a-zA-Z0-9_ -]+$/'
         ]);
         $items->title = $request->title;

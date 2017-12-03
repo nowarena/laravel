@@ -77,23 +77,47 @@
 
     <div style="clear:both;"></div>
     <table border="0" cellpadding="4" cellspacing="4">
-        @foreach( $items as $task )
-            <form action="{{ route('items.update', $task) }}" method="post">
+        @foreach( $items as $item )
+            <form id="form_{{ $item->id }}" action="{{ route('items.update', $item) }}" method="post">
             <input type="hidden" name="on_page" value="{{$items->currentPage()}}">
             {{ csrf_field() }}
             <tr>
                 <td>
-                    <input type="text" size="30" name="title" value="{{ $task->title }}">
+                    <input type="text" size="30" name="title" value="{{ $item->title }}">
+                    <input type="hidden" size="30" name="title_old" value="{{ $item->title }}">
                 </td>
                 <td>
-                    <input type="text" size="60" name="description" value="{{ $task->description }}">
+                    <input type="text" size="60" name="description" value="{{ $item->description }}">
                 </td>
                 <td>
                     <button class="btn btn-primary" name="edit">Submit Edit</button>
                 </td>
                 <td>
-                    <a class="btn btn-danger" href="{{ route('items.delete', $task )}}" onclick="return confirm('Really delete?');">Delete</a>
+                    <a class="btn btn-danger" href="{{ route('items.delete', $item )}}" onclick="return confirm('Really delete?');">Delete</a>
 
+                </td>
+            </tr>
+            <tr>
+                <td class="tdTitle">Parent Categories</td>
+                <td colspan="2">
+                {{--item_cat_id is the primary key in items_cats join table--}}
+                @if (empty($selectedCatsArr))
+                    @include('layouts.partials.catsdd', [
+                        'items_cats_id' => 0,
+                        'catsArr' => $catsArr,
+                        'selectedCatsId' => 0,
+                        'itemsId' => $item->id
+                    ])
+                @else
+                    @foreach($selectedCatsArr as $i => $selectedCat)
+                        @include('layouts.partials.catsdd', [
+                            'items_cats_id' => $selectedCat->id,
+                            'catsArr' => $catsArr,
+                            'selectedCatsId' => $selectedCat->cats_id,
+                            'itemsId' => $item->id
+                        ])
+                    @endforeach
+                @endif
                 </td>
             </tr>
             </form>
