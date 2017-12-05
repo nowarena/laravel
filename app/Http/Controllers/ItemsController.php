@@ -31,13 +31,24 @@ class ItemsController extends Controller
         $itemsId = $request->items_id;
         $itemsCatsId = $request->items_cats_id;
         $itemsCats = new ItemsCats();
-        if ($itemsCatsId == 0) {
-            ItemsCats::create(['cats_id' => $catsId, 'items_id' => $request->items_id]);
+        $date= date('Y-m-d H:i:s');
+        if ($catsId == 0) {
+            $itemsCats->id = $itemsCatsId;
+            $r = $itemsCats->destroy($itemsCatsId);
+        }elseif ($itemsCatsId == 0) {
+            $itemsCatsId = $itemsCats->insertGetId([
+                'cats_id' => $catsId,
+                'items_id' => $request->items_id,
+                'created_at' => $date,
+                'updated_at' => $date
+
+                ]);
         } else {
-            $itemsCats->where('id', $itemsCatsId)->update(['items_id' => $itemsId, 'cats_id' => $catsId]);
+            $itemsCats->where('id', $itemsCatsId)
+                ->update(['items_id' => $itemsId, 'cats_id' => $catsId, 'updated_at' => $date]);
         }
 
-        return response()->json(array($catsId,$itemsId));
+        return response()->json(array('cats_id' => $catsId, 'items_id' => $itemsId, 'items_cats_id' => $itemsCatsId));
 
     }
 
@@ -69,24 +80,40 @@ class ItemsController extends Controller
             $items = $items->where("title", "like", "%" . $search . "%");
         }
 
-        $items = $items->paginate(3);
+        $itemsColl = $items->paginate(3);
 
         $cats = new Cats();
         $catsArr = $cats->get();
 
         $itemsIdArr = array();
-        foreach ($items as $item) {
+        foreach ($itemsColl as $item) {
             $itemsIdArr[] = $item->id;
         }
-//        $itemsCats = new ItemsCats();
-        $selectedCatsArr = array();
+        $itemsCatsColl = array();
         if (count($itemsIdArr)) {
-            $selectedCatsArr = DB::table('items_cats')->whereIn('items_id', $itemsIdArr)->get();
+            $itemsCatsColl = DB::table('items_cats')
+                ->whereIn('items_id', $itemsIdArr)->get();
         }
+
+        // Build lookup table of items_id that points to related cats_ids for that items_id
+        $itemsCatsLookupArr = array();
+        foreach($itemsColl as $itemsObj) {
+            $hasCats = false;
+            foreach($itemsCatsColl as $itemsCatsObj) {
+                if ($itemsCatsObj->items_id == $itemsObj->id) {
+                    $hasCats = true;
+                    $itemsCatsLookupArr[$itemsObj->id][$itemsCatsObj->cats_id] = $itemsCatsObj->id;
+                }
+            }
+            if ($hasCats == false) {
+                $itemsCatsLookupArr[$itemsObj->id] = new \stdClass();
+            }
+        }
+        $itemsCatsLookupJson = json_encode($itemsCatsLookupArr);
 
         return view(
             'items.index',
-            compact('items', 'sort', 'search', 'catsArr', 'selectedCatsArr')
+            compact('itemsColl', 'sort', 'search', 'catsArr', 'itemsCatsColl', 'itemsCatsLookupJson')
         );
     }
 
@@ -97,7 +124,7 @@ class ItemsController extends Controller
      */
     public function create()
     {
-        return view('items.create');
+        //return view('items.create');
     }
 
     /**
