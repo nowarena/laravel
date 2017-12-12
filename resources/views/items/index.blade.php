@@ -76,31 +76,41 @@
     @endphp
 
     <div style="clear:both;"></div>
-    <table id='categoryTable' border="0" cellpadding="4" cellspacing="4">
+    <div id='categoryTable'>
         @foreach( $itemsColl as $item )
             <form id="form_{{ $item->id }}" action="{{ route('items.update', $item) }}" method="post">
             <input type="hidden" name="on_page" value="{{$itemsColl->currentPage()}}">
             {{ csrf_field() }}
-            <tr>
-                <td>
+            <div class='tr'>
+                <div class='td'>
                     <input type="text" size="30" name="title" value="{{ $item->title }}">
                     <input type="hidden" size="30" name="title_old" value="{{ $item->title }}">
-                </td>
-                <td>
+                </div>
+                <div class='td'>
                     <input type="text" size="60" name="description" value="{{ $item->description }}">
-                </td>
-                <td>
+                </div>
+                <div class='td'>
                     <button class="btn btn-primary" name="edit">Submit Edit</button>
-                </td>
-                <td>
+                </div>
+                <div class='td'>
                     <a class="btn btn-danger" href="{{ route('items.delete', $item )}}" onclick="return confirm('Really delete?');">Delete</a>
 
-                </td>
-            </tr>
-            <tr id="associateCategory">
-                <td class="tdTitle">Associate Category</td>
-                <td colspan='2'><div id='addCatsDDId_{{ $item->id }}'></div></td>
-            </tr>
+                </div>
+            </div>
+            <div class='tr'>
+                <div class='td'  id='addCatsCheckboxes_{{ $item->id }}'>
+                    @include('layouts.partials.catscheckboxes', [
+                        'catsArr' => $catsArr,
+                        'itemsId' => $item->id,
+                        'selectedCatsId' => 0,
+                        'itemsCatsArr' => $itemsCatsArr
+                    ])
+                </div>
+            </div>
+
+
+            <hr>
+
 
             </form>
         @endforeach
@@ -114,65 +124,59 @@
 @php
 echo "<pre>";
 
-print_r(DB::getQueryLog());
+//print_r(DB::getQueryLog());
 echo "sort:\n";
 print_r($sort);
 echo "search:\n";
 print_r($search);
-echo "itemsCatsColl:\n";
-print_r($itemsCatsColl);
+//echo "itemsCatsColl:\n";
+//print_r($itemsCatsColl);
 echo "catsArr:\n";
-print_r($catsArr->toArray());
+print_r($catsArr);
 echo "itemsArr:\n";
-$itemsArr = $itemsColl->toArray()['data'];
+//$itemsArr = $itemsColl->toArray()['data'];
 print_r($itemsArr);
-echo "itemsColl:\n";
-print_r($itemsColl->toArray());
-
+//echo "itemsColl:\n";
+//print_r($itemsColl->toArray());
 echo "</pre>";
-echo "<script>var itemsArr = " . json_encode($itemsArr) . ";</script>";
 @endphp
 
 <script>
 
+var itemsArr = @php echo json_encode($itemsArr); @endphp;
 // catsArr
-var catsArr = {!! $catsArr !!};
-// selectedCatsArr
-var itemsCatsArr = {!! $itemsCatsColl !!};
-
-// itemsCatsLookupArr keys: [items_id][cats_id] = items_cats.id
-@php
-//echo 'var itemsCatsLookupArr = [' . $itemsCatsLookupJson . '];';
-echo 'var itemsCatsLookupArr = ' . $itemsCatsLookupJson . ';';
-@endphp
-
-
-
+var catsArr = @php echo json_encode($catsArr); @endphp;
+// selected arr  keys: [items_id][cats_id] = items_cats.id
+var itemsCatsArr = @php echo json_encode($itemsCatsArr); @endphp;
 
 $(document).ready(function() {
 
     // run first time page loads. builds category dds
+    console.log("catsArr", catsArr);
+    console.log("itemsArr", itemsArr);
+    console.log("itemsCatsArr", itemsCatsArr);
 
-    //console.log("itemsCatsLookupArrB", itemsCatsLookupArr.pop());
-    console.log("itemsCatsLookupArrA", itemsCatsLookupArr);
-    console.log("itemsCatsLookupArr length", itemsCatsLookupArr.length);
-    console.log("itemsCatsLookupArrA", itemsCatsLookupArr[1][1]);
-    var count = Object.keys(itemsCatsLookupArr).length;
-    if (count > 0) {
-        for(var itemsId in itemsCatsLookupArr) {
-            itemsCatsId = null;
-            catsId = null;
-            for(var catsId in itemsCatsLookupArr[itemsId]) {
-                console.log("catsId", catsId);
-                console.log(itemsCatsLookupArr[catsId]);
-                var itemsCatsId = itemsCatsLookupArr[itemsId][catsId];
-                var itemsCatsObj = {items_id:itemsId, cats_id:catsId, items_cats_id:itemsCatsId};
-                console.log("A itemsCatsObj", itemsCatsObj);
-                mngCategoryDD(itemsCatsObj);
+    // add category checkboxes
+    mngCategoryCheckboxes();
+
+    function mngCategoryCheckboxes() {
+
+        for(var itemsId in itemsArr) {
+            var ckboxes = '';
+            for (var catsId in catsArr) {
+                ckboxes+= catsArr[catsId] + ": <input type='checkbox' name='catsArr[" + itemsId + "][]' value='" + catsId + "' ";
+                if (typeof itemsCatsArr[itemsId] !== 'undefined' && typeof itemsCatsArr[itemsId][catsId] !== 'undefined') {
+                    ckboxes+= "checked";
+                }
+                ckboxes+="> | ";
             }
-
+            $("#addCatsCheckboxes_" + itemsId).html(ckboxes);
         }
+
     }
+
+
+
 
     //
     // UPDATE CATEGORY ON CHANGE
@@ -199,6 +203,7 @@ $(document).ready(function() {
     });
 
     function updateItemsCats(data, csrfToken) {
+
         var request = $.ajax({
             method: "POST",
             url: '/items/updateitemcat',
@@ -213,7 +218,7 @@ $(document).ready(function() {
             console.log('response', response);
             var insertId = false;
             var deleteId = false;
-            if (response.items_cats_id >0 && data.items_cats_id == 0) {
+            if (response.items_cats_id > 0 && data.items_cats_id == 0) {
                 // it was an insert if data.items_cats_id is 0 (items_cats_id hasn't been created yet)
                 // the response.items_cats_id is the primary key from the server of items_cats table
                 insertId = response.items_cats_id;
@@ -233,136 +238,6 @@ $(document).ready(function() {
         });
     }
 
-    function updateItemsCatsJson(response, insertId, deleteId) {
-
-        // it was an insert into items_cats table, new category associated for item, not an update, so insert into json
-        if (insertId) {
-            console.log("insertId", insertId);
-            var obj = [];
-            obj.id = insertId;
-            obj.cats_id = response.cats_id;
-            obj.items_id = response.items_id;
-            itemsCatsArr.push(obj);
-            return;
-        }
-
-        for(var i in itemsCatsArr) {
-            if (deleteId && itemsCatsArr[i].id == deleteId) {
-                console.log("deleted id", deleteId);
-                itemsCatsArr.splice(i, 1);
-                break;
-            } else if (itemsCatsArr[i].id == response.items_cats_id) {
-                itemsCatsArr[i].cats_id = response.cats_id;
-                itemsCatsArr[i].items_id = response.items_id;
-                break;
-            }
-        }
-        console.log("updateItemsCatsJson update final", JSON.stringify(itemsCatsArr));
-    }
-
-    function mngCategoryDD(itemsCatsObj, insertId, deleteId) {
-
-        // Manage containing ROW
-        if (deleteId) {
-            // remove the row
-            $("#updateCategory_" + deleteId).remove();
-        } else if (insertId) {
-            var rowId = insertId;
-        } else {
-            var rowId = itemsCatsObj.items_id;
-            console.log("rowId:", rowId);
-        }
-
-        // if the category was new and not an update, add the new row to hold the dd
-        if ($("#catsDDId_" + rowId).length == 0) {
-            console.log("no existing row found for " + rowId + ", building new one");
-            var trRow = "<tr id='updateCategory_" + rowId + "'>";
-            trRow+= "<td class='tdTitle'>Update Category</td>";
-            trRow+= "<td colspan='2'>";
-            trRow+= "<div id='catsDDId_" + rowId + "'></div>";
-            trRow+= "</td>";
-            trRow+= "</tr>";
-            $("#categoryTable").append(trRow);
-        }
-
-
-
-        buildCategoryDD(itemsCatsObj, 'update');
-
-        // Manage drop downs
-        //
-        // rebuild 'Associate Category'
-        // if all categories used, replace display
-        // console.log("itemsCatsArr.length", itemsCatsArr.length);
-        // console.log("catsArr.length", catsArr.length);
-        // console.log("catsArr", catsArr);
-        // console.log("itemsCatsArr", itemsCatsArr);
-        // var numCatsItemHas = 0;
-        // for(var i in itemsCatsArr) {
-        //     if (itemsCatsArr[i].items_id == itemsCatsObj.items_id) {
-        //         numCatsItemHas++;
-        //     }
-        // }
-        // if (numCatsItemHas == catsArr.length) {
-        //     $("#addCatsDDId_" + itemsCatsObj.items_id).html("All Categories Used");
-        // } else {
-        //     var obj = {};
-        //     obj.id = 0;
-        //     obj.items_id = itemsCatsObj.items_id;
-        //     obj.cats_id = 0;
-        //     console.log("add obj", obj);
-        //     buildCategoryDD(obj, 'add');
-        // }
-        //
-        // // rebuild all 'Update Category' dd
-        // for(var i in itemsCatsArr) {
-        //     buildCategoryDD(itemsCatsArr[i], 'update');
-        // }
-
-    }
-
-    function buildCategoryDD(itemsCatsObj, action) {
-
-        console.log("itemsCatsObj B:", itemsCatsObj);
-        console.log("action", action);
-
-        var optionStr = '';
-        for(var i in catsArr) {
-            var selectedInOtherDD = false;
-            for(var j in itemsCatsArr) {
-                if (catsArr[i].id == itemsCatsArr[j].cats_id && itemsCatsObj.id != itemsCatsArr[j].id) {
-                    // if already selected, but not for this dd
-                    selectedInOtherDD = true;
-                    break;
-                }
-            }
-            if (selectedInOtherDD == false) {
-                optionStr+= "<option value='" + catsArr[i].id + "' ";
-                if (catsArr[i].id == itemsCatsObj.cats_id) {
-                    optionStr+= "selected ";
-                }
-                optionStr+= ">" + catsArr[i].title + "</option>";
-            }
-        }
-        if (optionStr != '') {
-            var selectMsg = (itemsCatsObj.id == 0) ? "Associate Category" : "Delete This Category";
-            ddStr = "<select class='catsDD' data-itemscatsid='" + itemsCatsObj.id + "' data-itemsid='" + itemsCatsObj.items_id + "'>";
-            ddStr+= '<option value="0"';
-            if (itemsCatsObj.id == 0) {
-                ddStr+= ' selected';
-            }
-            ddStr+= '>' + selectMsg + '</option>';
-            ddStr+= optionStr;
-            ddStr+= "</select>";
-
-            // add the drop down
-            if (action == 'add') {
-                $("#addCatsDDId_" + itemsCatsObj.id).html(ddStr);
-            } else {
-                $("#catsDDId_" + itemsCatsObj.id).html(ddStr);
-            }
-        }
-    }
 
 
 });

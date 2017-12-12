@@ -82,9 +82,6 @@ class ItemsController extends Controller
 
         $itemsColl = $items->paginate(3);
 
-        $cats = new Cats();
-        $catsArr = $cats->get();
-
         $itemsIdArr = array();
         foreach ($itemsColl as $item) {
             $itemsIdArr[] = $item->id;
@@ -96,24 +93,37 @@ class ItemsController extends Controller
         }
 
         // Build lookup table of items_id that points to related cats_ids for that items_id
-        $itemsCatsLookupArr = array();
+        $itemsCatsArr = array();
+        $itemsArr = [];
         foreach($itemsColl as $itemsObj) {
             $hasCats = false;
             foreach($itemsCatsColl as $itemsCatsObj) {
                 if ($itemsCatsObj->items_id == $itemsObj->id) {
                     $hasCats = true;
-                    $itemsCatsLookupArr[$itemsObj->id][$itemsCatsObj->cats_id] = $itemsCatsObj->id;
+                    $itemsCatsArr[$itemsObj->id][$itemsCatsObj->cats_id][] = $itemsCatsObj->id;
                 }
             }
             if ($hasCats == false) {
+                // this saves on having to check for undefined before getting length of array
                 $itemsCatsLookupArr[$itemsObj->id] = new \stdClass();
             }
+            $itemsArr[$itemsObj->id] = $itemsObj->title;
         }
-        $itemsCatsLookupJson = json_encode($itemsCatsLookupArr);
+
+
+        $cats = new Cats();
+        $catsArr = $cats->get();
+        $newCatsArr = [];
+        foreach($catsArr as $i => $obj) {
+            $newCatsArr[$obj->id] = $obj->title;
+        }
+        $catsArr = $newCatsArr;
+
+
 
         return view(
             'items.index',
-            compact('itemsColl', 'sort', 'search', 'catsArr', 'itemsCatsColl', 'itemsCatsLookupJson')
+            compact('itemsColl', 'sort', 'search', 'catsArr', 'itemsArr', 'itemsCatsArr', 'itemsCatsColl')
         );
     }
 
@@ -172,8 +182,9 @@ class ItemsController extends Controller
      * @param  \App\Items  $items
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Items $items)
+    public function update(Request $request, Items $items, ItemsCats $itemsCats, Cats $cats)
     {
+    $catsArr = $request->selectedCatsArr;
         $uniqueTitleValidation = '';
         if (trim(strtolower($request->title_old)) != trim(strtolower($request->title))) {
             $uniqueTitleValidation = '|unique:items';

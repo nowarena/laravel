@@ -3,7 +3,11 @@
 <head>
     @include('layouts.partials.head')
     <link href="{{ asset('css/admin.css') }}" rel="stylesheet">
-    @include('layouts.partials.adminheader-scripts')
+    @if (App::environment('local'))
+        @include('layouts.partials.adminheader-scripts-dev')
+    @else
+        @include('layouts.partials.adminheader-scripts')
+    @endif
 </head>
 <body>
 @include('layouts.partials.nav')
